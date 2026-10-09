@@ -2,14 +2,15 @@
 
 from contextlib import redirect_stdout
 import hashlib
-from io import StringIO
+from io import BytesIO, StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
-from face_finder.cli import build, load, search
+from face_finder.cli import build, load, model_file, search
 
 
 class StubFaces:
@@ -24,6 +25,21 @@ class StubFaces:
 
 
 class IndexTest(unittest.TestCase):
+    def test_model_checksum_and_cache(self):
+        name = "face_detection_yunet_2023mar.onnx"
+        with TemporaryDirectory() as temp, patch(
+            "face_finder.cli.MODELS", {name: ("yunet", hashlib.sha256(b"model").hexdigest())}
+        ):
+            cache = Path(temp)
+            with patch("face_finder.cli.urlopen", return_value=BytesIO(b"wrong")):
+                with self.assertRaisesRegex(ValueError, "checksum"):
+                    model_file(name, cache)
+                self.assertFalse((cache / name).exists())
+            with patch("face_finder.cli.urlopen", return_value=BytesIO(b"model")) as download:
+                self.assertEqual(model_file(name, cache).read_bytes(), b"model")
+                self.assertEqual(model_file(name, cache).read_bytes(), b"model")
+                download.assert_called_once()
+
     def test_demo_collection(self):
         root = Path(__file__).resolve().parents[1] / "examples"
         gallery = list((root / "gallery").glob("*.jpg"))

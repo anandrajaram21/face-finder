@@ -21,7 +21,8 @@ MODELS = {
     ),
 }
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
-MODEL_BASE = "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models"
+# Keep the source revision fixed; SHA-256 below also verifies the downloaded bytes.
+MODEL_BASE = "https://media.githubusercontent.com/media/opencv/opencv_zoo/47534e27c9851bb1128ccc0102f1145e27f23f98/models"
 
 
 def model_file(name, cache):
@@ -140,8 +141,8 @@ def build(folder, destination, faces):
     manifest = {"folder": str(folder), "model": "sface-2021dec-yunet-2023mar", "photos": stamps, "faces": records}
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=destination, delete=False) as tmp:
         temporary = Path(tmp.name)
-        json.dump(manifest, tmp)
     try:
+        temporary.write_text(json.dumps(manifest), encoding="utf-8")
         temporary.replace(manifest_path)
     finally:
         temporary.unlink(missing_ok=True)
@@ -198,7 +199,7 @@ def main(argv=None):
             build(args.gallery, args.index_dir, engine)
         else:
             search(args.query, args.index_dir, engine, args.top_k, args.threshold)
-    except (ValueError, OSError, cv2.error) as exc:
+    except (ValueError, OSError, RuntimeError, cv2.error) as exc:
         parser.exit(1, f"Error: {exc}\n")
 
 

@@ -1,24 +1,35 @@
 # face-finder
 
-Find photos containing a face from a reference image. Designed as a portable, lightweight local pipeline: OpenCV YuNet detects faces, OpenCV SFace makes embeddings, and FAISS searches them. No Pinecone, API credentials, cloud account, or GPU required. Model weights download on first run (internet required then); subsequent runs use the local copies.
+Find photos containing a face from a reference image. OpenCV YuNet detects faces, SFace embeds them, and a local FAISS index searches the embeddings. No GPU, API key, Pinecone, or cloud account is needed. Scores are cosine similarities, **not** identity probabilities.
 
-## Run locally
+## Local setup
 
-Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then from this repository:
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and clone this repository. uv installs the required Python version (3.11–3.13) and dependencies from `uv.lock`:
 
-```sh
-uv sync
-uv run face-finder index examples/gallery
-uv run face-finder search examples/query/millie-query.jpg
-uv run face-finder search examples/query/zendaya-query.jpg
-```
+   ```sh
+   git clone git@github.com:anandrajaram21/face-finder.git
+   cd face-finder
+   uv sync --locked
+   ```
 
-The gallery has 52 TV/movie celebrity photos—including real cast and red-carpet group photos—and two separate query portraits. Each query matches both individual and group photos; the 52-photo demo gallery takes about 10 MB. Image licenses and credits for every file are in [examples/README.md](examples/README.md). Replace `examples/gallery` with any folder of photos and the query path with your reference photo. Re-run `index` after changing the gallery; unchanged photos (including no-face photos) are reused, removed photos disappear from results. Results list similarity scores, photo paths and `[x, y, width, height]` face boxes. To search a different gallery independently, pass the same `--index-dir PATH` to both commands. `search --top-k 5 --threshold 0.363` changes the per-face number of results and similarity cutoff (scores are **not** identity probabilities). See `uv run face-finder --help` and `uv run face-finder search --help`.
+   If you use HTTPS instead of SSH, clone `https://github.com/anandrajaram21/face-finder.git`. This repository may require GitHub access while it is private.
 
-CPU-only on macOS, Linux and Windows; no GPU required. First run downloads ~39 MB of checked model weights into `~/.cache/face-finder/models`; the Python environment takes additional disk space. OpenCV YuNet + SFace is intentionally lighter than the source notebook's TensorFlow VGG-Face + RetinaFace. Search quality and demographic performance vary; check results yourself before relying on them. Keep the local index and private photos out of Git. Use face matching responsibly and with permission for any other photos you index.
+2. Index a gallery, then search using a **different** photo of a person in that gallery:
+
+   ```sh
+   uv run face-finder index examples/gallery
+   uv run face-finder search examples/query/millie-query.jpg
+   uv run face-finder search examples/query/zendaya-query.jpg
+   ```
+
+The 52-photo gallery includes individual and group photos; each query comes from a separate source image. See [image credits and licenses](examples/README.md) for all 54 files. Substitute your own gallery folder and query image. Supported formats: JPEG, PNG, WebP, BMP. The index lives in `.face-finder/` in the current directory; rerun `index` after changing the gallery. Unchanged photos, including those without detectable faces, are reused; removed photos disappear from results. Results show photo paths, similarity scores, and `[x, y, width, height]` face boxes. Use the same `--index-dir PATH` on both commands to keep galleries separate. `search --top-k 5 --threshold 0.363` controls the number of photos per query face and minimum score. Run `uv run face-finder --help` or `uv run face-finder search --help` for options.
+
+The first run needs internet to download ~39 MB of SHA-256-verified model weights from OpenCV Zoo into `~/.cache/face-finder/models/`; later runs work offline. The Python environment needs additional space. Use `--models-dir PATH` **before** `index` or `search` to change the model cache. If an index is incomplete or incompatible, delete its `.face-finder/` directory (or your custom index directory) and re-index. For a failed model download, check connectivity and retry; corrupted cached weights are checked and re-downloaded. Neither cache nor local index is committed.
+
+Run the offline checks with `uv run python -m unittest discover -s tests -v`. The CLI runs on macOS, Linux, and Windows without a GPU. YuNet + SFace is lighter than the historical TensorFlow VGG-Face + RetinaFace prototype; quality and demographic performance vary. Review matches yourself, and only process photos you have permission to use.
 
 ## Colab
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/anandrajaram21/face-finder/blob/main/notebooks/demo.ipynb)
 
-The [interactive standalone notebook](notebooks/demo.ipynb) accepts a ZIP of photos or a Google Drive folder and a query image upload; no source edits, API keys or local installation needed. While this GitHub repository is private, the Colab badge requires repository access; anyone with the downloaded notebook can instead upload the `.ipynb` file to Colab. Once the repo is public, the badge works for everyone. Run its cells from top to bottom. To try the included examples, ZIP `examples/gallery/` and upload it as the gallery, click **Build gallery**, then upload `examples/query/millie-query.jpg` or `zendaya-query.jpg` and click **Search**. You can also select a folder on Drive instead of uploading a ZIP. The Colab index is in memory and resets with the runtime. [`notebooks/original-colab.ipynb`](notebooks/original-colab.ipynb) is preserved only for provenance; it is incomplete and uses Pinecone. The CLI and notebook use the same YuNet + SFace model family and local FAISS search.
+The [standalone interactive notebook](notebooks/demo.ipynb) runs directly in Colab: run cells top to bottom, upload a ZIP of gallery photos (or mount a Drive folder), click **Build gallery**, upload a query photo, then click **Search**. To use the included examples, ZIP `examples/gallery/` and upload it, then upload either photo in `examples/query/`. Files uploaded via Colab's Files sidebar can instead be entered by their `/content/...` paths. It installs its own dependencies; no local package or API keys are needed. Its index is in memory and resets with the Colab runtime. If the GitHub repository is private, the badge requires access; alternatively download `notebooks/demo.ipynb` and upload it to Colab. [`notebooks/original-colab.ipynb`](notebooks/original-colab.ipynb) is an incomplete historical prototype using Pinecone, not the portable implementation.
