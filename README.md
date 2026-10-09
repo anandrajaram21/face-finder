@@ -1,4 +1,4 @@
-# face-finder
+# Face Finder
 
 Find photos containing a face from a reference image. OpenCV YuNet detects faces, SFace embeds them, and a local FAISS index searches the embeddings. No GPU, API key, or cloud account is needed. Scores are cosine similarities, **not** identity probabilities.
 
