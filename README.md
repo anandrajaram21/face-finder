@@ -7,12 +7,10 @@ Find photos containing a face from a reference image. OpenCV YuNet detects faces
 1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and clone this repository. uv installs the required Python version (3.11–3.13) and dependencies from `uv.lock`:
 
    ```sh
-   git clone git@github.com:anandrajaram21/face-finder.git
+   git clone https://github.com/anandrajaram21/face-finder.git
    cd face-finder
    uv sync --locked
    ```
-
-   If you use HTTPS instead of SSH, clone `https://github.com/anandrajaram21/face-finder.git`. This repository may require GitHub access while it is private.
 
 2. Index a gallery, then search using a **different** photo of a person in that gallery:
 
@@ -32,4 +30,4 @@ Run the offline checks with `uv run python -m unittest discover -s tests -v`. Th
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/anandrajaram21/face-finder/blob/main/notebooks/demo.ipynb)
 
-The [standalone interactive notebook](notebooks/demo.ipynb) runs directly in Colab: run cells top to bottom, upload a ZIP of gallery photos (or mount a Drive folder), click **Build gallery**, upload a query photo, then click **Search**. To use the included examples, ZIP `examples/gallery/` and upload it, then upload either photo in `examples/query/`. Files uploaded via Colab's Files sidebar can instead be entered by their `/content/...` paths. It installs its own dependencies; no local package or API keys are needed. Its index is in memory and resets with the Colab runtime. If the GitHub repository is private, the badge requires access; alternatively download `notebooks/demo.ipynb` and upload it to Colab. [`notebooks/original-colab.ipynb`](notebooks/original-colab.ipynb) is an incomplete historical prototype using Pinecone, not the portable implementation.
+The [standalone interactive notebook](notebooks/demo.ipynb) runs directly in Colab: run cells top to bottom, upload a ZIP of gallery photos (or mount a Drive folder), click **Build gallery**, upload a query photo, then click **Search**. To use the included examples, ZIP `examples/gallery/` and upload it, then upload either photo in `examples/query/`. Files uploaded via Colab's Files sidebar can instead be entered by their `/content/...` paths. It installs its own dependencies; no local package or API keys are needed. Its index is in memory and resets with the Colab runtime. [`notebooks/original-colab.ipynb`](notebooks/original-colab.ipynb) is an incomplete historical prototype using Pinecone, not the portable implementation.
