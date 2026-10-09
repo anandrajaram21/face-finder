@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "face-finder"
+version = "0.1.0"
+description = "Find faces in a photo collection using lightweight local models and FAISS"
+requires-python = ">=3.11,<3.14"
+dependencies = ["opencv-contrib-python-headless>=4.10,<5", "faiss-cpu>=1.9,<2", "numpy>=1.26,<3"]
+
+[project.scripts]
+face-finder = "face_finder.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/face_finder"]
