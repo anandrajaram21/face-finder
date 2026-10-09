@@ -2,7 +2,7 @@
 
 ## Architecture
 
-The portable pipeline is local: OpenCV YuNet detects faces in gallery and query images, OpenCV SFace generates embeddings, and FAISS indexes/searches embeddings with source-image paths and face coordinates. Model weights are downloaded on first use and cached locally. Keep the CLI (`face-finder index` / `face-finder search`) thin, use the same detection/embedding path for both operations, and do not add Pinecone or credential requirements. `notebooks/original-colab.ipynb` is a historical prototype, not the portable implementation.
+The portable pipeline is local: OpenCV YuNet detects faces in gallery and query images, OpenCV SFace generates embeddings, and FAISS indexes/searches embeddings with source-image paths and face coordinates. Model weights are downloaded on first use and cached locally. Keep the CLI (`face-finder index` / `face-finder search`) thin, use the same detection/embedding path for both operations, and do not add Pinecone or credential requirements.
 
 ## Development and checks
 
