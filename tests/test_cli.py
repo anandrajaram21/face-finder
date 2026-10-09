@@ -1,6 +1,7 @@
 """Small offline check for incremental FAISS indexing and multi-face search."""
 
 from contextlib import redirect_stdout
+import hashlib
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -23,6 +24,17 @@ class StubFaces:
 
 
 class IndexTest(unittest.TestCase):
+    def test_demo_collection(self):
+        root = Path(__file__).resolve().parents[1] / "examples"
+        gallery = list((root / "gallery").glob("*.jpg"))
+        queries = list((root / "query").glob("*.jpg"))
+        self.assertEqual((len(gallery), len(queries)), (52, 2))
+        credits = (root / "README.md").read_text()
+        self.assertEqual(len({hashlib.sha256(p.read_bytes()).digest() for p in gallery + queries}), 54)
+        for image in gallery + queries:
+            self.assertIn(f"`{image.relative_to(root)}`", credits)
+        self.assertNotIn("obama", credits.lower())
+
     def test_incremental_and_search(self):
         with TemporaryDirectory() as temp:
             gallery, cache = Path(temp) / "gallery", Path(temp) / "cache"
